@@ -175,7 +175,7 @@ angular.module("materialCalendar").service("MaterialCalendarData", [function () 
             this.data[this.getDayKey(date)] = content || "";
         };
     }
-    return new CalendarData();
+    return CalendarData();
 }]);
 
 angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse", "$templateRequest", "$q", "materialCalendar.Calendar", "MaterialCalendarData", function ($compile, $parse, $templateRequest, $q, Calendar, CalendarData) {
@@ -217,7 +217,9 @@ angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse"
             noOfDays: "=?",
             clearDataCacheOnLoad: "=?",
             disableFutureSelection: "=?",
-            disableSelection: "=?"
+            disableSelection: "=?",
+            calendarData: "=?"
+
         },
         link: function ($scope, $element, $attrs) {
 
@@ -227,6 +229,11 @@ angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse"
             var date = new Date();
             var month = parseInt($attrs.startMonth || date.getMonth());
             var year = parseInt($attrs.startYear || date.getFullYear());
+
+            if(!!$attrs.calendarData)
+                $scope.dataService = $scope.calendarData;
+            else
+                $scope.dataService = new CalendarData;
 
             $scope.columnWeekLayout = "column";
             $scope.weekLayout = "row";
@@ -317,7 +324,7 @@ angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse"
             };
 
             $scope.hasEvents = function (date) {
-                var data = CalendarData.data[$scope.dayKey(date)];
+                var data = $scope.dataService.data[$scope.dayKey(date)];
                 return (data && data.length > 0);
             };
 
@@ -396,12 +403,7 @@ angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse"
                 }
 
                 return $q.when($scope.template() || defaultTemplate);
-            };
-
-
-
-
-            $scope.dataService = CalendarData;
+            }
 
             // Set the html contents of each date.
             var getDayKey = function (date) {
